@@ -138,7 +138,7 @@ def eliminar_producto():
     codigo=input('Ingrese el codigo del producto que desea eliminar: ')
     cursor.execute(
         "DELETE FROM producto WHERE id=?",
-        (codigo)
+        (codigo,)
     )
     if cursor.rowcount>0:
         conexion.commit()
@@ -154,7 +154,7 @@ def buscar_producto_por_categoria():
         "SELECT * FROM produto WHERE categoria=? COLLATE NOCASE",
         (categoria,)
     )
-    productos=cursor.fetchall
+    productos=cursor.fetchall()
     if not producto:
         print('No se encontraron resultados en categoria')
         return
@@ -171,7 +171,7 @@ def buscar_producto_por_categoria():
                     
 def mostrar_productos_agotados():
     print('===== PRODUCTOS AGOTADOS =====')
-    cursor.execute("SELECT * FORM producto WHERE cantidad_disponible<=0")
+    cursor.execute("SELECT * FROM producto WHERE cantidad_disponible<=0")
     productos=cursor.fetchall()
     if not producto:
         print('No hay productos agotados')
