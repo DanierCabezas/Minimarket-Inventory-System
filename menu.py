@@ -7,7 +7,7 @@ cursor= conexion.cursor()
 
 
 def menu_productos():
-    print('======== SUPERMERCADO EL AHORRO ========')
+    print('======== SUPERMERCADO EL CANASTO ========')
     print('1. Resgistrar producto')
     print('2. Mostrar productos')
     print('3. Buscar producto')
@@ -135,54 +135,71 @@ def modificar_producto():
     
 def eliminar_producto():
     print('======== ELIMINAR PRODUCTO ========')
-    codigo=input('Ingrese el codigo del producto que desea eliminar: ').lower()
-    for indice, producto in enumerate(productos):
-        if producto['codigo'].lower()==codigo:
-            productos.pop(indice)
-            print('-------- Producto eliminado exitosamente --------')
-            return
-    print('No se encontro el producto con el codigo ingresado.')
+    codigo=input('Ingrese el codigo del producto que desea eliminar: ')
+    cursor.execute(
+        "DELETE FROM producto WHERE id=?",
+        (codigo)
+    )
+    if cursor.rowcount>0:
+        conexion.commit()
+        print('----------PRODUCTO ELIMINADO EXITOSAMENTE-------------------')
+    else:
+        print('------------No se encontro tal producto---------------------')
+        
     
 def buscar_producto_por_categoria():
     print('======== BUSCAR PRODUCTO POR CATEGORIA ========')
     categoria=input('Ingrese la categoria del producto que desea buscar: ').lower()
-    encontrados=False
+    cursor.execute(
+        "SELECT * FROM produto WHERE categoria=? COLLATE NOCASE",
+        (categoria,)
+    )
+    productos=cursor.fetchall
+    if not producto:
+        print('No se encontraron resultados en categoria')
+        return
     for producto in productos:
         if producto['categoria'].lower()==categoria:
-            print('Codigo:',producto['codigo'])
-            print('Nombre:',producto['nombre'])
-            print('Categoria:',producto['categoria'])
-            print('Precio de compra:',producto['precio_Compra'])
-            print('Precio de venta:',producto['precio_Venta'])
-            print('Cantidad disponible:',producto['cantidad_disponible'])
-            print('Proveedor:',producto['proveedor'])
+            print('Codigo:',producto[0])
+            print('Nombre:',producto[1])
+            print('Categoria:',producto[2])
+            print('Precio de compra:',producto[3])
+            print('Precio de venta:',producto[4])
+            print('Cantidad disponible:',producto[5])
+            print('Proveedor:',producto[6])
             print('-----------------------------------')
-            encontrados=True
-    if not encontrados:
-        print('No se encontraron productos en la categoria ingresada.')
-        
+                    
 def mostrar_productos_agotados():
     print('===== PRODUCTOS AGOTADOS =====')
-    agotados = [producto for producto in productos
-                if producto['cantidad_disponible'] <= 0]
-    if not agotados:
-        print('No hay productos agotados.')
+    cursor.execute("SELECT * FORM producto WHERE cantidad_disponible<=0")
+    productos=cursor.fetchall()
+    if not producto:
+        print('No hay productos agotados')
         return
-
-    for producto in agotados:
-        print('Codigo:', producto['codigo'])
-        print('Nombre:', producto['nombre'])
-        print('Categoria:', producto['categoria'])
-        print('Proveedor:', producto['proveedor'])
+    
+    for producto in productos:
+        print('Codigo:', producto[0])
+        print('Nombre:', producto[1])
+        print('Categoria:', producto[2])
+        print('Proveedor:', producto[6])
         print('-----------------------------------')
 
 def total_productos():
     print('======= TOTAL DEL INVENTARIO =======')
-    total = sum(
-        producto['precio_Venta'] * producto['cantidad_disponible']
-        for producto in productos
-    )
-    print(f'Valor total: {total}')
+
+    cursor.execute("""
+        SELECT
+            COUNT(*),
+            COALESCE(SUM(Cantidad_disponible), 0),
+            COALESCE(SUM(Precio_venta * Cantidad_disponible), 0)
+        FROM producto
+    """)
+
+    resultado = cursor.fetchone()
+
+    print('Productos registrados:', resultado[0])
+    print('Unidades disponibles:', resultado[1])
+    print(f'Valor total del inventario: ${resultado[2]:,.2f}')
     
 while True:
     
