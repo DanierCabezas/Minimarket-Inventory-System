@@ -173,7 +173,7 @@ def mostrar_productos_agotados():
     print('===== PRODUCTOS AGOTADOS =====')
     cursor.execute("SELECT * FROM producto WHERE cantidad_disponible<=0")
     productos=cursor.fetchall()
-    if not producto:
+    if not productos:
         print('No hay productos agotados')
         return
     
